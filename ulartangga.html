@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ular Tangga Multiplayer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: flex-start;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+
+        #container {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-start;
+            width: 100%;
+        }
+
+        #register-form {
+            margin: 20px;
+            text-align: center;
+        }
+
+        #board {
+            display: none;
+            position: relative;
+            display: grid;
+            grid-template-columns: repeat(10, 50px);
+            grid-template-rows: repeat(10, 50px);
+            gap: 2px;
+            margin: 20px 0;
+            width: 520px;
+            height: 520px;
+            background-color: #f0f0f0;
+            border: 2px solid #333;
+        }
+
+        #board div {
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            line-height: 50px;
+            border: 1px solid #ccc;
+            background-color: white;
+            font-weight: bold;
+        }
+
+        .player {
+            width: 30px;
+            height: 30px;
+            position: absolute;
+            background-size: cover;
+            background-repeat: no-repeat;
+            border-radius: 50%;
+            border: 2px solid #000;
+        }
+
+        #chatbox {
+            display: none;
+            width: 300px;
+            height: 500px;
+            margin-left: 20px;
+            padding: 10px;
+            border: 2px solid #333;
+            background-color: #fff;
+            overflow-y: scroll;
+        }
+
+        #chatbox h3 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        #message-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .chat-message {
+            padding: 5px;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+            max-width: 250px;
+            font-size: 14px;
+            color: #333;
+            word-wrap: break-word;
+        }
+
+        #controls {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .tangga {
+            position: absolute;
+            width: 10px;
+            height: 150px;
+            background: linear-gradient(to bottom, #8B4513 20%, #A0522D 20%, #A0522D 40%, #8B4513 40%, #8B4513 60%, #A0522D 60%, #A0522D 80%, #8B4513 80%);
+            z-index: 1;
+            transform-origin: bottom;
+        }
+
+        .ular img {
+            width: 100px;
+            height: auto;
+        }
+
+        #message-input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-top: 20px;
+            font-size: 14px;
+            border: 2px solid #333;
+            border-radius: 5px;
+        }
+
+        #send-btn {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #send-btn:hover {
+            background-color: #45a049;
+        }
+
+        /* Setiap kotak dengan warna acak */
+        .color1 { background-color: #FF0000; }
+        .color2 { background-color: #0000FF; }
+        .color3 { background-color: #008000; }
+        .color4 { background-color: #FFFFFF; }
+        .color5 { background-color: #000000; }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <!-- Form Registrasi -->
+        <div id="register-form">
+            <h1>Ular Tangga Multiplayer</h1>
+            <p>Game ini dibuat oleh <strong>ZALLKALTIM</strong></p>
+            <p>Masukkan nama Anda untuk bermain:</p>
+            <input type="text" id="username" placeholder="Nama Pengguna" required>
+            <button id="startGame">Daftar dan Mulai</button>
+        </div>
+
+        <!-- Papan Permainan -->
+        <div id="board">
+            <!-- Menambahkan kotak nomor 1 hingga 100 dengan warna-warna berbeda -->
+            <script>
+                const colors = ['color1', 'color2', 'color3', 'color4', 'color5'];
+                for (let i = 1; i <= 100; i++) {
+                    const box = document.createElement("div");
+                    box.textContent = i;
+                    box.id = `box${i}`;
+                    box.classList.add(colors[i % 5]); // Menggunakan warna berbeda
+                    document.getElementById("board").appendChild(box);
+                }
+            </script>
+            
+            <!-- Tangga -->
+            <div class="tangga" style="top: 350px; left: 100px; transform: rotate(-45deg);"></div>
+            <div class="tangga" style="top: 100px; left: 400px; transform: rotate(45deg);"></div>
+
+            <!-- Ular -->
+            <div class="ular" style="top: 50px; left: 200px;">
+                <img src="https://via.placeholder.com/100x50/FF0000" alt="Ular">
+            </div>
+            <div class="ular" style="top: 250px; left: 350px;">
+                <img src="https://via.placeholder.com/100x50/FF0000" alt="Ular">
+            </div>
+
+            <!-- Pemain -->
+            <div id="player1" class="player" style="top: 0; left: 0;"></div>
+            <div id="player2" class="player" style="top: 0; left: 50px;"></div>
+            <div id="player3" class="player" style="top: 0; left: 100px;"></div>
+            <div id="player4" class="player" style="top: 0; left: 150px;"></div>
+            <div id="player5" class="player" style="top: 0; left: 200px;"></div>
+        </div>
+
+        <!-- Papan Obrolan -->
+        <div id="chatbox">
+            <h3>Chat</h3>
+            <div id="message-container"></div>
+            <input type="text" id="message-input" placeholder="Ketik pesan...">
+            <button id="send-btn">Kirim</button>
+        </div>
+    </div>
+
+    <!-- Kontrol Permainan -->
+    <div id="controls">
+        <button id="rollDice">Roll Dice</button>
+        <p id="diceResult">Dice: 0</p>
+        <p id="playerTurn">Turn: Player 1</p>
+    </div>
+
+    <script>
+        const players = [
+            { id: "player1", position: 0, element: document.getElementById("player1") },
+            { id: "player2", position: 0, element: document.getElementById("player2") },
+            { id: "player3", position: 0, element: document.getElementById("player3") },
+            { id: "player4", position: 0, element: document.getElementById("player4") },
+            { id: "player5", position: 0, element: document.getElementById("player5") },
+        ];
+
+        const ladders = [
+            { start: 3, end: 22 },
+            { start: 5, end: 8 }
+        ];
+
+        const snakes = [
+            { head: 27, tail: 5 },
+            { head: 40, tail: 18 }
+        ];
+
+        let currentPlayerIndex = 0;
+
+        // Registrasi dan kirim ke WhatsApp
+        document.getElementById("startGame").addEventListener("click", () => {
+            const username = document.getElementById("username").value;
+
+            if (!username) {
+                alert("Harap masukkan nama pengguna!");
+                return;
+            }
+
+            // Kirim data ke WhatsApp
+            const phoneNumber = "086246691849"; // Nomor WhatsApp penerima
+            const message = `Halo, saya ${username} ingin bermain ular tangga!`;
+            const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+
+            // Buka WhatsApp untuk mengirim pesan
+            window.open(whatsappURL, "_blank");
+
+            // Sembunyikan form registrasi dan tampilkan permainan
+            document.getElementById("register-form").style.display = "none";
+            document.getElementById("board").style.display = "grid";
+            document.getElementById("chatbox").style.display = "block";
+            document.getElementById("controls").style.display = "block";
+        });
+
+        // Simulasi roll dice
+        document.getElementById("rollDice").addEventListener("click", () => {
+            const dice = Math.floor(Math.random() * 6) + 1;
+            document.getElementById("diceResult").innerText = `Dice: ${dice}`;
+            movePlayer(currentPlayerIndex, dice);
+
+            currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+            document.getElementById("playerTurn").innerText = `Turn: Player ${currentPlayerIndex + 1}`;
+        });
+
+        // Kirim pesan ke chatbox
+        document.getElementById("send-btn").addEventListener("click", () => {
+            const message = document.getElementById("message-input").value;
+            if (message) {
+                const chatMessage = document.createElement("div");
+                chatMessage.classList.add("chat-message");
+                chatMessage.textContent = message;
+                document.getElementById("message-container").appendChild(chatMessage);
+                document.getElementById("message-input").value = '';
+            }
+        });
+
+        function movePlayer(playerIndex, steps) {
+            const player = players[playerIndex];
+            player.position += steps;
+            if (player.position > 100) player.position = 100;
+
+            const newPosition = document.getElementById(`box${player.position}`);
+            player.element.style.top = `${newPosition.offsetTop}px`;
+            player.element.style.left = `${newPosition.offsetLeft}px`;
+        }
+    </script>
+</body>
+</html>
